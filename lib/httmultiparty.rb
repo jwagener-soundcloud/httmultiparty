@@ -20,7 +20,12 @@ module HTTMultiParty
      end
 
      def put(path, options={})
-       #perform_request Net::HTTP::Put, path, options
+       method = Net::HTTP::Put
+       if query_contains_files?(options[:query])
+         method = MultipartPut
+         options[:body] = map_files_to_upload_io(options.delete(:query))
+       end
+       perform_request method, path, options
      end
 
     private
