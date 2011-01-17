@@ -13,8 +13,8 @@ describe HTTMultiParty do
   end
 
   it "should extend HTTParty::Request::SupportedHTTPMethods with Multipart methods" do
-    HTTParty::Request::SupportedHTTPMethods.should include Net::HTTP::Post::Multipart
-    HTTParty::Request::SupportedHTTPMethods.should include Net::HTTP::Put::Multipart
+    HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPost
+    HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPut
   end
 
   describe '#query_contains_files?' do
@@ -44,15 +44,14 @@ describe HTTMultiParty do
       
       it "should setup new request with Net::HTTP::Post::Multipart" do
         HTTParty::Request.should_receive(:new) \
-          .with(Net::HTTP::Post::Multipart, anything, anything) \
+          .with(HTTMultiParty::MultipartPost, anything, anything) \
           .and_return(mock("mock response", :perform => nil))
         klass.post('http://example.com/', :query => query)
       end
       
-      it "should map files in query to upload io" do
-#        upload_io = UploadIO.new(somefile, 'application/octet-stream', 'somefile.txt')
+      it "should map queries with files to special body hash with upload io" do
         HTTParty::Request.should_receive(:new) \
-          .with(anything, anything, {:query => hash_including({:somefile => instance_of(UploadIO)})}) \
+          .with(anything, anything, {:body => hash_including({:somefile => instance_of(UploadIO)})}) \
           .and_return(mock("mock response", :perform => nil))
         klass.post('http://example.com/', :query => query)
       end
