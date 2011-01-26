@@ -48,13 +48,32 @@ describe HTTMultiParty do
           .and_return(mock("mock response", :perform => nil))
         klass.post('http://example.com/', :query => query)
       end
-      
-      it "should map queries with files to special body hash with upload io" do
-        HTTParty::Request.should_receive(:new) \
-          .with(anything, anything, {:body => hash_including({:somefile => instance_of(UploadIO)})}) \
-          .and_return(mock("mock response", :perform => nil))
-        klass.post('http://example.com/', :query => query)
-      end
+    end
+  end
+  
+  describe "#flatten_params" do
+    it "should handle complex hashs" do
+      HTTMultiParty.flatten_params({
+        :foo => 'bar',
+        :deep => {
+          :deeper  => 1,
+          :deeper2 => 2,
+          :deeparray => [1,2,3],
+          :deephasharray => [
+            {:id => 1},
+            {:id => 2}
+          ]
+        }
+      }).should == [
+        ['foo',                         'bar'],
+        ['deep[deeper]',                1],
+        ['deep[deeper2]',               2],
+        ['deep[deeparray][]',           1],
+        ['deep[deeparray][]',           2],
+        ['deep[deeparray][]',           3],
+        ['deep[deephasharray][][id]',   1],
+        ['deep[deephasharray][][id]',   2],
+      ]
     end
   end
 end

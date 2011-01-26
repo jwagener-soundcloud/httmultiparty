@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
  
   s.required_rubygems_version = ">= 1.3.6"
   
-  s.add_dependency 'httparty'
+  s.add_dependency 'httparty', ">= 0.7.3"
   s.add_dependency 'multipart-post'
 
   s.add_development_dependency "rspec"
