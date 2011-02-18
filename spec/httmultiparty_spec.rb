@@ -49,6 +49,17 @@ describe HTTMultiParty do
         klass.post('http://example.com/', :query => query)
       end
     end
+    
+    describe 'when :body contains a file' do
+      let(:body) { {:somefile => somefile } }
+
+      it "should setup new request with Net::HTTP::Post::Multipart" do
+        HTTParty::Request.should_receive(:new) \
+          .with(HTTMultiParty::MultipartPost, anything, anything) \
+          .and_return(mock("mock response", :perform => nil))
+        klass.post('http://example.com/', :body => body)
+      end
+    end
   end
   
   describe "#flatten_params" do
