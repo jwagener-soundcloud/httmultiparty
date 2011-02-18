@@ -42,9 +42,9 @@ module HTTMultiParty
    module ClassMethods
      def post(path, options={})
        method = Net::HTTP::Post
-       if query_contains_files?(options[:query])
+       options[:body] ||= options.delete(:query)
+       if query_contains_files?(options[:body])
          method = MultipartPost
-         options[:body] = options.delete(:query)
          options[:query_string_normalizer] = HTTMultiParty::QUERY_STRING_NORMALIZER
        end
        perform_request method, path, options
@@ -52,9 +52,9 @@ module HTTMultiParty
 
      def put(path, options={})
        method = Net::HTTP::Put
-       if query_contains_files?(options[:query])
+       options[:body] ||= options.delete(:query)
+       if query_contains_files?(options[:body])
          method = MultipartPut
-         options[:body] = options.delete(:query)
          options[:query_string_normalizer] = HTTMultiParty::QUERY_STRING_NORMALIZER
        end
        perform_request method, path, options
