@@ -67,7 +67,6 @@ module HTTMultiParty
    end
 end
 
-dir = Pathname(__FILE__).dirname.expand_path
-require dir + 'httmultiparty/multipartable'
-require dir + 'httmultiparty/multipart_post'
-require dir + 'httmultiparty/multipart_put'
+require 'httmultiparty/multipartable'
+require 'httmultiparty/multipart_post'
+require 'httmultiparty/multipart_put'
