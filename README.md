@@ -7,12 +7,11 @@
   <li>multipart-post</li>
 </ul>
 
-<h2>O RLY?</h2>
+<h2>Quick Start and Example</h2>
 <p>To start just "include HTTMultiParty" instead of "include HTTParty" into your client class.
 When you pass a query with an instance of a File as a value for a PUT or POST request, the wrapper will 
 use a bit of magic and multipart-post to execute a multipart upload:</p>
 
-<h2>Example</h2>
 <pre>
 require 'lib/httmultiparty'
 class SomeClient
@@ -25,3 +24,5 @@ response = SomeClient.post('/', :query => {
     :somefile => File.new('README.md')
   })
 </pre>
+
+Aside from that it provides all the usual HTTParty gimmicks.
