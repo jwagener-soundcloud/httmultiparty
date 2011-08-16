@@ -11,6 +11,6 @@ module HTTMultiParty::Multipartable
     parts << Parts::EpiloguePart.new(boundary)
     self.set_content_type("multipart/form-data", { "boundary" => boundary })
     self.content_length = parts.inject(0) {|sum,i| sum + i.length }
-    self.body_stream = CompositeReadIO.new(*parts.map(&:to_io))
+    self.body_stream = CompositeReadIO.new(*parts.map { |part| part.to_io })
   end
 end
