@@ -22,6 +22,10 @@ describe HTTMultiParty do
       klass.send(:query_contains_files?, {:a => 1, :somefile => somefile}).should be_true
     end
 
+    it "should return true if one of the values in the passed hash is an upload io " do
+      klass.send(:query_contains_files?, {:a => 1, :somefile => UploadIO.new(somefile, "application/octet-stream")}).should be_true
+    end
+
     it "should return false if one of the values in the passed hash is a file" do
       klass.send(:query_contains_files?, {:a => 1, :b => 'nope'}).should be_false
     end
