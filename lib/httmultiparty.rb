@@ -62,7 +62,7 @@ module HTTMultiParty
 
     private
       def query_contains_files?(query)
-        query.is_a?(Hash) && query.select { |k,v| v.is_a?(Hash) ? query_contains_files?(v) : v.is_a?(File) }.length > 0
+        query.is_a?(Hash) && query.select { |k,v| v.is_a?(Hash) ? query_contains_files?(v) : (v.is_a?(File) || v.is_a?(UploadIO)) }.length > 0
       end
    end
 end
