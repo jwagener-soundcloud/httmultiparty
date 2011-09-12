@@ -67,6 +67,7 @@ module HTTMultiParty
    end
 end
 
+require 'httmultiparty/version'
 require 'httmultiparty/multipartable'
 require 'httmultiparty/multipart_post'
 require 'httmultiparty/multipart_put'
