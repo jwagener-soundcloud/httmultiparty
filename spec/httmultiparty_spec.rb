@@ -17,20 +17,24 @@ describe HTTMultiParty do
     HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPut
   end
 
-  describe '#query_contains_files?' do
+  describe '#hash_contains_files?' do
     it "should return true if one of the values in the passed hash is a file" do
-      klass.send(:query_contains_files?, {:a => 1, :somefile => somefile}).should be_true
+      klass.send(:hash_contains_files?, {:a => 1, :somefile => somefile}).should be_true
     end
 
     it "should return true if one of the values in the passed hash is an upload io " do
-      klass.send(:query_contains_files?, {:a => 1, :somefile => UploadIO.new(somefile, "application/octet-stream")}).should be_true
+      klass.send(:hash_contains_files?, {:a => 1, :somefile => UploadIO.new(somefile, "application/octet-stream")}).should be_true
     end
 
     it "should return false if one of the values in the passed hash is a file" do
-      klass.send(:query_contains_files?, {:a => 1, :b => 'nope'}).should be_false
+      klass.send(:hash_contains_files?, {:a => 1, :b => 'nope'}).should be_false
+    end
+    
+    it "should return true if passed hash includes an a array of files" do
+      klass.send(:hash_contains_files?, {:somefiles => [somefile, somefile]}).should be_true      
     end
   end
-
+  
   describe '#post' do    
     it "should respond to post" do
       klass.should respond_to :post
@@ -89,6 +93,23 @@ describe HTTMultiParty do
         ['deep[deephasharray][][id]',   1],
         ['deep[deephasharray][][id]',   2],
       ]
+    end
+  end
+  
+  describe "::QUERY_STRING_NORMALIZER" do
+    subject { HTTMultiParty::QUERY_STRING_NORMALIZER }
+    it "should map a file to UploadIO" do
+      (first_k, first_v) = subject.call({
+        :file => somefile
+      }).first
+      
+      first_v.should be_an UploadIO      
+    end
+    
+    it "should map an array of files to UploadIOs" do
+      subject.call({
+        :file => [somefile, somefile]
+      }).each { |(k,v)| v.should be_an UploadIO }
     end
   end
 end
