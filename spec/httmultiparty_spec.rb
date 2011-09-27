@@ -83,7 +83,7 @@ describe HTTMultiParty do
             {:id => 2}
           ]
         }
-      }).should == [
+      }).sort_by(&:first).should == [
         ['foo',                         'bar'],
         ['deep[deeper]',                1],
         ['deep[deeper2]',               2],
@@ -92,7 +92,7 @@ describe HTTMultiParty do
         ['deep[deeparray][]',           3],
         ['deep[deephasharray][][id]',   1],
         ['deep[deephasharray][][id]',   2],
-      ]
+      ].sort_by(&:first)
     end
   end
   
