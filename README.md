@@ -13,16 +13,16 @@ When you pass a query with an instance of a File as a value for a PUT or POST re
 use a bit of magic and multipart-post to execute a multipart upload:</p>
 
 <pre>
-require 'lib/httmultiparty'
+require 'httmultiparty'
 class SomeClient
   include HTTMultiParty
   base_uri 'http://localhost:3000'
 end
 
 response = SomeClient.post('/', :query => {
-    :foo      => 'bar',
-    :somefile => File.new('README.md')
-  })
+  :foo      => 'bar',
+  :somefile => File.new('README.md')
+})
 </pre>
 
 Aside from that it provides all the usual HTTParty gimmicks.
