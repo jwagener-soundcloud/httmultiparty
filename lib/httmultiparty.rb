@@ -19,7 +19,11 @@ module HTTMultiParty
   end
 
   def self.file_to_upload_io(file)
-    filename =  File.split(file.path).last
+    if file.respond_to? :original_filename
+      filename = file.original_filename
+    else
+      filename =  File.split(file.path).last
+    end
     content_type = 'application/octet-stream'
     UploadIO.new(file, content_type, filename)
   end
