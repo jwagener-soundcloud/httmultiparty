@@ -1,12 +1,15 @@
 gem 'httparty'
 gem 'multipart-post'
+require 'tempfile'
 require 'httparty'
 require 'net/http/post/multipart'
 
 module HTTMultiParty
+  TRANSFORMABLE_TYPES = [File, Tempfile]
+
   QUERY_STRING_NORMALIZER = Proc.new do |params|
     HTTMultiParty.flatten_params(params).map do |(k,v)|
-      [k, v.is_a?(File) ? HTTMultiParty.file_to_upload_io(v) : v]
+      [k, TRANSFORMABLE_TYPES.include?(v.class) ? HTTMultiParty.file_to_upload_io(v) : v]
     end
   end
 
@@ -16,7 +19,11 @@ module HTTMultiParty
   end
 
   def self.file_to_upload_io(file)
-    filename =  File.split(file.path).last
+    if file.respond_to? :original_filename
+      filename = file.original_filename
+    else
+      filename =  File.split(file.path).last
+    end
     content_type = 'application/octet-stream'
     UploadIO.new(file, content_type, filename)
   end
@@ -37,6 +44,34 @@ module HTTMultiParty
       end
     end
     flattened
+  end
+
+  class Basement
+    include HTTMultiParty
+  end
+
+  def self.get(*args)
+    Basement.get(*args)
+  end
+
+  def self.post(*args)
+    Basement.post(*args)
+  end
+
+  def self.put(*args)
+    Basement.put(*args)
+  end
+
+  def self.delete(*args)
+    Basement.delete(*args)
+  end
+
+  def self.head(*args)
+    Basement.head(*args)
+  end
+
+  def self.options(*args)
+    Basement.options(*args)
   end
 
    module ClassMethods
@@ -63,7 +98,7 @@ module HTTMultiParty
     private
       def hash_contains_files?(hash)
         hash.is_a?(Hash) && HTTMultiParty.flatten_params(hash).select do |(k,v)| 
-          v.is_a?(File) || v.is_a?(UploadIO)
+          TRANSFORMABLE_TYPES.include?(v.class) || v.is_a?(UploadIO)
         end.size > 0
       end
    end
