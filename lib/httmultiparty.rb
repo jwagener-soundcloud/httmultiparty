@@ -46,6 +46,34 @@ module HTTMultiParty
     flattened
   end
 
+  class Basement
+    include HTTMultiParty
+  end
+
+  def self.get(*args)
+    Basement.get(*args)
+  end
+
+  def self.post(*args)
+    Basement.post(*args)
+  end
+
+  def self.put(*args)
+    Basement.put(*args)
+  end
+
+  def self.delete(*args)
+    Basement.delete(*args)
+  end
+
+  def self.head(*args)
+    Basement.head(*args)
+  end
+
+  def self.options(*args)
+    Basement.options(*args)
+  end
+
    module ClassMethods
      def post(path, options={})
        method = Net::HTTP::Post
