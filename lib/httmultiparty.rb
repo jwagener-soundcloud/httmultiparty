@@ -1,12 +1,15 @@
 gem 'httparty'
 gem 'multipart-post'
+require 'tempfile'
 require 'httparty'
 require 'net/http/post/multipart'
 
 module HTTMultiParty
+  TRANSFORMABLE_TYPES = [File, Tempfile]
+
   QUERY_STRING_NORMALIZER = Proc.new do |params|
     HTTMultiParty.flatten_params(params).map do |(k,v)|
-      [k, v.is_a?(File) ? HTTMultiParty.file_to_upload_io(v) : v]
+      [k, TRANSFORMABLE_TYPES.include?(v.class) ? HTTMultiParty.file_to_upload_io(v) : v]
     end
   end
 
@@ -63,7 +66,7 @@ module HTTMultiParty
     private
       def hash_contains_files?(hash)
         hash.is_a?(Hash) && HTTMultiParty.flatten_params(hash).select do |(k,v)| 
-          v.is_a?(File) || v.is_a?(UploadIO)
+          TRANSFORMABLE_TYPES.include?(v.class) || v.is_a?(UploadIO)
         end.size > 0
       end
    end

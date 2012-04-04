@@ -6,6 +6,7 @@ require 'net/http/post/multipart'
 
 describe HTTMultiParty do
   let(:somefile) { File.new(File.join(File.dirname(__FILE__), 'fixtures/somefile.txt')) }
+  let(:sometempfile) { Tempfile.new('sometempfile') }
   let(:klass) { Class.new.tap { |k| k.instance_eval { include HTTMultiParty} } }
 
   it "should include HTTParty module" do
@@ -24,6 +25,10 @@ describe HTTMultiParty do
 
     it "should return true if one of the values in the passed hash is an upload io " do
       klass.send(:hash_contains_files?, {:a => 1, :somefile => UploadIO.new(somefile, "application/octet-stream")}).should be_true
+    end
+
+    it "should return true if one of the values in the passed hash is a tempfile" do
+      klass.send(:hash_contains_files?, {:a => 1, :somefile => sometempfile}).should be_true
     end
 
     it "should return false if one of the values in the passed hash is a file" do
@@ -106,9 +111,17 @@ describe HTTMultiParty do
       first_v.should be_an UploadIO      
     end
     
+    it "should map a Tempfile to UploadIO" do
+      (first_k, first_v) = subject.call({
+        :file => sometempfile
+      }).first
+
+      first_v.should be_an UploadIO
+    end
+
     it "should map an array of files to UploadIOs" do
       subject.call({
-        :file => [somefile, somefile]
+        :file => [somefile, sometempfile]
       }).each { |(k,v)| v.should be_an UploadIO }
     end
   end
