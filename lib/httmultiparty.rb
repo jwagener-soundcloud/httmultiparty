@@ -46,10 +46,6 @@ module HTTMultiParty
     flattened
   end
 
-  class Basement
-    include HTTMultiParty
-  end
-
   def self.get(*args)
     Basement.get(*args)
   end
@@ -102,6 +98,10 @@ module HTTMultiParty
         end.size > 0
       end
    end
+
+  class Basement
+    include HTTMultiParty
+  end
 end
 
 require 'httmultiparty/version'
