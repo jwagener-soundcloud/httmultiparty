@@ -31,7 +31,7 @@ describe HTTMultiParty do
       klass.send(:hash_contains_files?, {:a => 1, :somefile => sometempfile}).should be_true
     end
 
-    it "should return false if one of the values in the passed hash is a file" do
+    it "should return false if none of the values in the passed hash is a file" do
       klass.send(:hash_contains_files?, {:a => 1, :b => 'nope'}).should be_false
     end
     
