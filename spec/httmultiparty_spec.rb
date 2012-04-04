@@ -6,6 +6,8 @@ require 'net/http/post/multipart'
 
 describe HTTMultiParty do
   let(:somefile) { File.new(File.join(File.dirname(__FILE__), 'fixtures/somefile.txt')) }
+  let(:sometempfile) { Tempfile.new('sometempfile') }
+  let(:someuploadio) { UploadIO.new(somefile, "application/octet-stream") }
   let(:klass) { Class.new.tap { |k| k.instance_eval { include HTTMultiParty} } }
 
   it "should include HTTParty module" do
@@ -23,10 +25,14 @@ describe HTTMultiParty do
     end
 
     it "should return true if one of the values in the passed hash is an upload io " do
-      klass.send(:hash_contains_files?, {:a => 1, :somefile => UploadIO.new(somefile, "application/octet-stream")}).should be_true
+      klass.send(:hash_contains_files?, {:a => 1, :somefile => someuploadio}).should be_true
     end
 
-    it "should return false if one of the values in the passed hash is a file" do
+    it "should return true if one of the values in the passed hash is a tempfile" do
+      klass.send(:hash_contains_files?, {:a => 1, :somefile => sometempfile}).should be_true
+    end
+
+    it "should return false if none of the values in the passed hash is a file" do
       klass.send(:hash_contains_files?, {:a => 1, :b => 'nope'}).should be_false
     end
     
@@ -70,6 +76,20 @@ describe HTTMultiParty do
     end
   end
   
+  describe "#file_to_upload_io" do
+    it "should get the physical name of a file" do
+      HTTMultiParty.file_to_upload_io(somefile)\
+        .original_filename.should == 'somefile.txt'
+    end
+
+    it "should get the physical name of a file" do
+      # Let's pretend this is a file upload to a rack app.
+      sometempfile.stub(:original_filename => 'stuff.txt')
+      HTTMultiParty.file_to_upload_io(sometempfile)\
+        .original_filename.should == 'stuff.txt'
+    end
+  end
+
   describe "#flatten_params" do
     it "should handle complex hashs" do
       HTTMultiParty.flatten_params({
@@ -106,9 +126,17 @@ describe HTTMultiParty do
       first_v.should be_an UploadIO      
     end
     
+    it "should map a Tempfile to UploadIO" do
+      (first_k, first_v) = subject.call({
+        :file => sometempfile
+      }).first
+
+      first_v.should be_an UploadIO
+    end
+
     it "should map an array of files to UploadIOs" do
       subject.call({
-        :file => [somefile, somefile]
+        :file => [somefile, sometempfile]
       }).each { |(k,v)| v.should be_an UploadIO }
     end
   end
