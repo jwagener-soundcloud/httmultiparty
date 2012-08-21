@@ -3,6 +3,7 @@ gem 'multipart-post'
 require 'tempfile'
 require 'httparty'
 require 'net/http/post/multipart'
+require 'mime/types'
 
 module HTTMultiParty
   TRANSFORMABLE_TYPES = [File, Tempfile]
@@ -24,7 +25,7 @@ module HTTMultiParty
     else
       filename =  File.split(file.path).last
     end
-    content_type = 'application/octet-stream'
+    content_type = (MIME::Types.type_for(filename)[0] || MIME::Types["application/octet-stream"][0]).simplified
     UploadIO.new(file, content_type, filename)
   end
 
