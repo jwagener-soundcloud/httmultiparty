@@ -15,7 +15,8 @@ Gem::Specification.new do |s|
   s.description = "HTTMultiParty is a thin wrapper around HTTParty to provide multipart uploads."
  
   s.required_rubygems_version = ">= 1.3.6"
-  
+
+  s.add_dependency 'mime-types',">=1.19"
   s.add_dependency 'httparty', ">= 0.7.3"
   s.add_dependency 'multipart-post'
 
