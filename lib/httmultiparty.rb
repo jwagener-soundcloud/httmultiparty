@@ -8,9 +8,13 @@ module HTTMultiParty
   TRANSFORMABLE_TYPES = [File, Tempfile]
 
   QUERY_STRING_NORMALIZER = Proc.new do |params|
-    HTTMultiParty.flatten_params(params).map do |(k,v)|
-      [k, TRANSFORMABLE_TYPES.include?(v.class) ? HTTMultiParty.file_to_upload_io(v) : v]
+    multipart = false
+    result = HTTMultiParty.flatten_params(params).map do |(k,v)|
+      multipart ||= TRANSFORMABLE_TYPES.include?(v.class)
+      [k, multipart ? HTTMultiParty.file_to_upload_io(v) : v]
     end
+
+    multipart ? result : HTTParty::Request::NON_RAILS_QUERY_STRING_NORMALIZER.call(params)
   end
 
   def self.included(base)
