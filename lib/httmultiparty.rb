@@ -10,8 +10,9 @@ module HTTMultiParty
   QUERY_STRING_NORMALIZER = Proc.new do |params|
     multipart = false
     result = HTTMultiParty.flatten_params(params).map do |(k,v)|
-      multipart ||= TRANSFORMABLE_TYPES.include?(v.class)
-      [k, multipart ? HTTMultiParty.file_to_upload_io(v) : v]
+      is_file = TRANSFORMABLE_TYPES.include?(v.class)
+      multipart ||= is_file
+      [k, is_file ? HTTMultiParty.file_to_upload_io(v) : v]
     end
 
     multipart ? result : HTTParty::Request::NON_RAILS_QUERY_STRING_NORMALIZER.call(params)
