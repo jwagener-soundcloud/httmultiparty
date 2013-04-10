@@ -139,5 +139,14 @@ describe HTTMultiParty do
         :file => [somefile, sometempfile]
       }).each { |(k,v)| v.should be_an UploadIO }
     end
+
+    it "should map a file and a string" do
+      (key, value) = subject.call({
+        :file => sometempfile,
+        :some_string => 'some string'
+      }).last
+
+      value.should be_a String
+    end
   end
 end
