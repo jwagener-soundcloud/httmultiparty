@@ -6,6 +6,8 @@ require 'net/http/post/multipart'
 
 describe HTTMultiParty do
   let(:somefile) { File.new(File.join(File.dirname(__FILE__), 'fixtures/somefile.txt')) }
+  let(:somejpegfile) { File.new(File.join(File.dirname(__FILE__), 'fixtures/somejpegfile.jpeg')) }
+  let(:somepngfile) { File.new(File.join(File.dirname(__FILE__), 'fixtures/somepngfile.png')) }
   let(:sometempfile) { Tempfile.new('sometempfile') }
   let(:someuploadio) { UploadIO.new(somefile, "application/octet-stream") }
   let(:klass) { Class.new.tap { |k| k.instance_eval { include HTTMultiParty} } }
@@ -87,6 +89,16 @@ describe HTTMultiParty do
       sometempfile.stub(:original_filename => 'stuff.txt')
       HTTMultiParty.file_to_upload_io(sometempfile)\
         .original_filename.should == 'stuff.txt'
+    end
+
+    it "should get the content-type of a JPEG file" do
+      HTTMultiParty.file_to_upload_io(somejpegfile)\
+        .content_type.should == 'image/jpeg'
+    end
+
+    it "should get the content-type of a PNG file" do
+      HTTMultiParty.file_to_upload_io(somepngfile)\
+        .content_type.should == 'image/png'
     end
   end
 
