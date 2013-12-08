@@ -7,7 +7,7 @@ module HTTMultiParty::Multipartable
   end
 
   def body=(value)
-    @body_parts = value.map {|(k,v)| Parts::Part.new(boundary, k, v)}
+    @body_parts = Array(value).map {|(k,v)| Parts::Part.new(boundary, k, v)}
     @body_parts << Parts::EpiloguePart.new(boundary)
     set_headers_for_body
   end
