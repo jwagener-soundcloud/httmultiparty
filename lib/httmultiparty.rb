@@ -5,7 +5,7 @@ require 'httparty'
 require 'net/http/post/multipart'
 
 module HTTMultiParty
-  TRANSFORMABLE_TYPES = [File, Tempfile]
+  TRANSFORMABLE_TYPES = [File, Tempfile, ActionDispatch::Http::UploadedFile]
 
   QUERY_STRING_NORMALIZER = Proc.new do |params|
     HTTMultiParty.flatten_params(params).map do |(k,v)|
