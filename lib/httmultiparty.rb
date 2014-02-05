@@ -16,6 +16,7 @@ module HTTMultiParty
   def self.included(base)
     base.send :include, HTTParty
     base.extend ClassMethods
+    @base = base
   end
 
   def self.file_to_upload_io(file)
@@ -24,7 +25,8 @@ module HTTMultiParty
     else
       filename =  File.split(file.path).last
     end
-    content_type = 'application/octet-stream'
+    content_type = @base.upload_file_content_type()
+    content_type = 'application/octet-stream' if content_type.blank?
     UploadIO.new(file, content_type, filename)
   end
 
@@ -90,6 +92,8 @@ module HTTMultiParty
        end
        perform_request method, path, options
      end
+
+    mattr_accessor :upload_file_content_type
 
     private
       def hash_contains_files?(hash)
