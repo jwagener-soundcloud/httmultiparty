@@ -12,7 +12,7 @@
 When you pass a query with an instance of a File as a value for a PUT or POST request, the wrapper will 
 use a bit of magic and multipart-post to execute a multipart upload:</p>
 
-<pre>
+```ruby
 require 'httmultiparty'
 class SomeClient
   include HTTMultiParty
@@ -23,6 +23,21 @@ response = SomeClient.post('/', :query => {
   :foo      => 'bar',
   :somefile => File.new('README.md')
 })
-</pre>
+```
+
+If you want the library to detect the MIME types of the uploaded files, then you need to enable it by supplying the `:detect_mime_type` option as `true` for the POST or PUT requests. Otherwise, they will be uploaded with the default MIME type of `application/octet-stream`. For example:
+
+```ruby
+require 'httmultiparty'
+class SomeClient
+  include HTTMultiParty
+  base_uri 'http://localhost:3000'
+end
+
+response = SomeClient.post('/', :query => {
+  :foo      => 'bar',
+  :somefile => File.new('README.md')
+}, :detect_mime_type => true)
+```
 
 Aside from that it provides all the usual HTTParty gimmicks.
