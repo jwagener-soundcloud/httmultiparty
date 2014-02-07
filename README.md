@@ -25,7 +25,7 @@ response = SomeClient.post('/', :query => {
 })
 ```
 
-If you want the library to detect the MIME types of the uploaded files, then you need to enable it by supplying the `:detect_mime_type` option as `true` for the POST or PUT requests. Otherwise, they will be uploaded with the default MIME type of `application/octet-stream`. For example:
+If you want the library to detect the MIME types of the uploaded files, then you need to enable it by supplying the `:detect_mime_type` option as `true` for POST or PUT requests. Otherwise, they will be uploaded with the default MIME type of `application/octet-stream`. For example:
 
 ```ruby
 require 'httmultiparty'
