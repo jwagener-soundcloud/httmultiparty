@@ -92,13 +92,23 @@ describe HTTMultiParty do
     end
 
     it "should get the content-type of a JPEG file" do
-      HTTMultiParty.file_to_upload_io(somejpegfile)\
+      HTTMultiParty.file_to_upload_io(somejpegfile, true)\
         .content_type.should == 'image/jpeg'
     end
 
     it "should get the content-type of a PNG file" do
-      HTTMultiParty.file_to_upload_io(somepngfile)\
+      HTTMultiParty.file_to_upload_io(somepngfile, true)\
         .content_type.should == 'image/png'
+    end
+
+    it "should get the content-type of a JPEG file as 'application/octet-stream' by default" do
+      HTTMultiParty.file_to_upload_io(somejpegfile)\
+        .content_type.should == 'application/octet-stream'
+    end
+
+    it "should get the content-type of a PNG file as 'application/octet-stream' by default" do
+      HTTMultiParty.file_to_upload_io(somepngfile)\
+        .content_type.should == 'application/octet-stream'
     end
   end
 
@@ -128,8 +138,8 @@ describe HTTMultiParty do
     end
   end
   
-  describe "::QUERY_STRING_NORMALIZER" do
-    subject { HTTMultiParty::QUERY_STRING_NORMALIZER }
+  describe "#query_string_normalizer" do
+    subject { HTTMultiParty.query_string_normalizer }
     it "should map a file to UploadIO" do
       (first_k, first_v) = subject.call({
         :file => somefile
@@ -150,6 +160,20 @@ describe HTTMultiParty do
       subject.call({
         :file => [somefile, sometempfile]
       }).each { |(k,v)| v.should be_an UploadIO }
+    end
+
+    describe "when :detect_mime_type is true" do
+      subject  { HTTMultiParty.query_string_normalizer(detect_mime_type: true) }
+
+      it "should map an array of files to UploadIOs with the correct mimetypes" do
+        result = subject.call({
+          :file => [somejpegfile, somepngfile]
+        })
+
+        content_types = result.map { |(k,v)| v.content_type  }
+
+        content_types.should == ['image/jpeg', 'image/png']
+      end
     end
   end
 end

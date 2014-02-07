@@ -8,25 +8,28 @@ require 'mimemagic'
 module HTTMultiParty
   TRANSFORMABLE_TYPES = [File, Tempfile]
 
-  QUERY_STRING_NORMALIZER = Proc.new do |params|
-    HTTMultiParty.flatten_params(params).map do |(k,v)|
-      [k, TRANSFORMABLE_TYPES.include?(v.class) ? HTTMultiParty.file_to_upload_io(v) : v]
-    end
-  end
-
   def self.included(base)
     base.send :include, HTTParty
     base.extend ClassMethods
   end
 
-  def self.file_to_upload_io(file)
+  def self.file_to_upload_io(file, detect_mime_type = false)
     if file.respond_to? :original_filename
       filename = file.original_filename
     else
       filename =  File.split(file.path).last
     end
-    content_type = MimeMagic.by_path(filename)
+    content_type = detect_mime_type ? MimeMagic.by_path(filename) : 'application/octet-stream'
     UploadIO.new(file, content_type, filename)
+  end
+
+  def self.query_string_normalizer(options = {})
+    detect_mime_type = options.fetch(:detect_mime_type, false)
+    Proc.new do |params|
+      HTTMultiParty.flatten_params(params).map do |(k,v)|
+        [k, TRANSFORMABLE_TYPES.include?(v.class) ? HTTMultiParty.file_to_upload_io(v, detect_mime_type) : v]
+      end
+    end
   end
 
   def self.flatten_params(params={}, prefix='')
@@ -77,7 +80,7 @@ module HTTMultiParty
        options[:body] ||= options.delete(:query)
        if hash_contains_files?(options[:body])
          method = MultipartPost
-         options[:query_string_normalizer] = HTTMultiParty::QUERY_STRING_NORMALIZER
+         options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
        end
        perform_request method, path, options
      end
@@ -87,7 +90,7 @@ module HTTMultiParty
        options[:body] ||= options.delete(:query)
        if hash_contains_files?(options[:body])
          method = MultipartPut
-         options[:query_string_normalizer] = HTTMultiParty::QUERY_STRING_NORMALIZER
+         options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
        end
        perform_request method, path, options
      end
