@@ -5,6 +5,7 @@
 <ul>
   <li>httparty</li>
   <li>multipart-post</li>
+  <li>mime/types</li>
 </ul>
 
 <h2>Quick Start and Example</h2>
