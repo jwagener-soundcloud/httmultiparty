@@ -18,6 +18,7 @@ GEM
     mimemagic (0.2.1)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
+    rake (10.1.1)
     rspec (2.9.0)
       rspec-core (~> 2.9.0)
       rspec-expectations (~> 2.9.0)
@@ -33,4 +34,5 @@ PLATFORMS
 DEPENDENCIES
   fakeweb
   httmultiparty!
+  rake
   rspec
