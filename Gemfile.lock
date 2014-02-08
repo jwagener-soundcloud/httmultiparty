@@ -3,6 +3,7 @@ PATH
   specs:
     httmultiparty (0.3.10)
       httparty (>= 0.7.3)
+      mimemagic
       multipart-post
 
 GEM
@@ -14,6 +15,7 @@ GEM
       json (~> 1.8)
       multi_xml (>= 0.5.2)
     json (1.8.1)
+    mimemagic (0.2.1)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
     rspec (2.9.0)
