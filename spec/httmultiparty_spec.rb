@@ -13,7 +13,7 @@ describe HTTMultiParty do
   let(:klass) { Class.new.tap { |k| k.instance_eval { include HTTMultiParty} } }
 
   it "should include HTTParty module" do
-    klass.included_modules.should include HTTParty 
+    klass.included_modules.should include HTTParty
   end
 
   it "should extend HTTParty::Request::SupportedHTTPMethods with Multipart methods" do
@@ -37,13 +37,13 @@ describe HTTMultiParty do
     it "should return false if none of the values in the passed hash is a file" do
       klass.send(:hash_contains_files?, {:a => 1, :b => 'nope'}).should be_false
     end
-    
+
     it "should return true if passed hash includes an a array of files" do
-      klass.send(:hash_contains_files?, {:somefiles => [somefile, somefile]}).should be_true      
+      klass.send(:hash_contains_files?, {:somefiles => [somefile, somefile]}).should be_true
     end
   end
-  
-  describe '#post' do    
+
+  describe '#post' do
     it "should respond to post" do
       klass.should respond_to :post
     end
@@ -54,10 +54,10 @@ describe HTTMultiParty do
         .and_return(mock("mock response", :perform => nil))
       klass.post('http://example.com/', {})
     end
-    
+
     describe 'when :query contains a file' do
       let(:query) { {:somefile => somefile } }
-      
+
       it "should setup new request with Net::HTTP::Post::Multipart" do
         HTTParty::Request.should_receive(:new) \
           .with(HTTMultiParty::MultipartPost, anything, anything) \
@@ -65,7 +65,7 @@ describe HTTMultiParty do
         klass.post('http://example.com/', :query => query)
       end
     end
-    
+
     describe 'when :body contains a file' do
       let(:body) { {:somefile => somefile } }
 
@@ -77,7 +77,7 @@ describe HTTMultiParty do
       end
     end
   end
-  
+
   describe "#file_to_upload_io" do
     it "should get the physical name of a file" do
       HTTMultiParty.file_to_upload_io(somefile)\
@@ -137,17 +137,17 @@ describe HTTMultiParty do
       ].sort_by(&:join)
     end
   end
-  
+
   describe "#query_string_normalizer" do
     subject { HTTMultiParty.query_string_normalizer }
     it "should map a file to UploadIO" do
       (first_k, first_v) = subject.call({
         :file => somefile
       }).first
-      
-      first_v.should be_an UploadIO      
+
+      first_v.should be_an UploadIO
     end
-    
+
     it "should map a Tempfile to UploadIO" do
       (first_k, first_v) = subject.call({
         :file => sometempfile
@@ -160,6 +160,16 @@ describe HTTMultiParty do
       subject.call({
         :file => [somefile, sometempfile]
       }).each { |(k,v)| v.should be_an UploadIO }
+    end
+
+    it 'parses file and non-file parameters properly irrespective of their position' do
+      response = subject.call(
+        :name  => 'foo',
+        :file  => somefile,
+        :title => 'bar'
+      )
+      response.first.should == ['name', 'foo']
+      response.last.should  == ['title', 'bar']
     end
 
     describe "when :detect_mime_type is true" do
