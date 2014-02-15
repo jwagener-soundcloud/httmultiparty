@@ -28,4 +28,13 @@ describe HTTMultiParty::Multipartable do
       it { should_not include("a") }
     end
   end
+
+  # in the case of http digest authentication, body= is called with empty string for the first request
+  it "should not raise an error with an empty-string body" do
+    lambda {
+      request = request_class.new("/path")
+      request.body = ''
+    }.should_not raise_error
+  end
+
 end
