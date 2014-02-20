@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    httmultiparty (0.3.10)
+    httmultiparty (0.3.12)
       httparty (>= 0.7.3)
       mimemagic
       multipart-post
