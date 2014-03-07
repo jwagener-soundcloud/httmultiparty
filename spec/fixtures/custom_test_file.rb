@@ -1,0 +1,1 @@
+class CustomTestFile < File; end

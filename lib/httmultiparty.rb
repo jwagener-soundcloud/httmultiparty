@@ -6,8 +6,6 @@ require 'net/http/post/multipart'
 require 'mimemagic'
 
 module HTTMultiParty
-  TRANSFORMABLE_TYPES = [File, Tempfile]
-
   def self.included(base)
     base.send :include, HTTParty
     base.extend ClassMethods
@@ -28,7 +26,7 @@ module HTTMultiParty
     Proc.new do |params|
       HTTMultiParty.flatten_params(params).map do |(k,v)|
         if file_present_in_params?(params)
-          [k, TRANSFORMABLE_TYPES.include?(v.class) ? HTTMultiParty.file_to_upload_io(v, detect_mime_type) : v]
+          [k, v.respond_to?(:read) ? HTTMultiParty.file_to_upload_io(v, detect_mime_type) : v]
         else
           "#{k}=#{v}"
         end
@@ -93,7 +91,7 @@ module HTTMultiParty
   end
 
   def self.file_present?(value)
-    TRANSFORMABLE_TYPES.include?(value.class) || value.is_a?(UploadIO)
+    value.respond_to?(:read)
   end
 
    module ClassMethods

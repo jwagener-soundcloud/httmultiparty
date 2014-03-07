@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), '..', 'lib', 'httmultiparty')
+require File.join(File.dirname(__FILE__), 'fixtures', 'custom_test_file')
 require 'fakeweb'
 
 def file_fixture(filename)
