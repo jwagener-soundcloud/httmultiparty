@@ -168,8 +168,8 @@ describe HTTMultiParty do
         :file  => somefile,
         :title => 'bar'
       )
-      response.first.should == ['name', 'foo']
-      response.last.should  == ['title', 'bar']
+      response.first.should == "name=foo"
+      response.last.should  == "title=bar"
     end
 
     describe "when :detect_mime_type is true" do
