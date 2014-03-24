@@ -27,7 +27,11 @@ module HTTMultiParty
     detect_mime_type = options.fetch(:detect_mime_type, false)
     Proc.new do |params|
       HTTMultiParty.flatten_params(params).map do |(k,v)|
-        [k, TRANSFORMABLE_TYPES.include?(v.class) ? HTTMultiParty.file_to_upload_io(v, detect_mime_type) : v]
+        if TRANSFORMABLE_TYPES.include?(v.class)
+          [k, HTTMultiParty.file_to_upload_io(v, detect_mime_type)]
+        else
+          "#{k}=#{v}"
+        end
       end
     end
   end
