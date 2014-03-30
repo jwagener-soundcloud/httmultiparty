@@ -76,6 +76,20 @@ describe HTTMultiParty do
         klass.post('http://example.com/', :body => body)
       end
     end
+
+    describe 'with default_params' do
+      let(:body) { { somefile: somefile } }
+
+      it 'should include default_params also' do
+        klass.tap do |c|
+          c.instance_eval { default_params(token: 'fake') }
+        end
+
+        FakeWeb.register_uri(:post, 'http://example.com?token=fake', body: 'hello world')
+
+        klass.post('http://example.com', body: body)
+      end
+    end
   end
 
   describe "#file_to_upload_io" do
@@ -168,8 +182,8 @@ describe HTTMultiParty do
         :file  => somefile,
         :title => 'bar'
       )
-      response.first.should == "name=foo"
-      response.last.should  == "title=bar"
+      response.first.should == ['name', 'foo']
+      response.last.should  == ['title', 'bar']
     end
 
     describe "when :detect_mime_type is true" do

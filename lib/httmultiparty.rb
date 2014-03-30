@@ -26,9 +26,19 @@ module HTTMultiParty
   def self.query_string_normalizer(options = {})
     detect_mime_type = options.fetch(:detect_mime_type, false)
     Proc.new do |params|
+      file_present = params.values.any? do |v|
+        if v.is_a? Array
+          v.any? { |vv| TRANSFORMABLE_TYPES.include?(vv.class) }
+        elsif v.is_a? Hash
+          v.values.any? { |vv| TRANSFORMABLE_TYPES.include?(vv.class) }
+        else
+          TRANSFORMABLE_TYPES.include?(v.class)
+        end
+      end
+
       HTTMultiParty.flatten_params(params).map do |(k,v)|
-        if TRANSFORMABLE_TYPES.include?(v.class)
-          [k, HTTMultiParty.file_to_upload_io(v, detect_mime_type)]
+        if file_present
+          [k, TRANSFORMABLE_TYPES.include?(v.class) ? HTTMultiParty.file_to_upload_io(v, detect_mime_type) : v]
         else
           "#{k}=#{v}"
         end
