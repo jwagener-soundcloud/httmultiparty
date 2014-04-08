@@ -83,11 +83,11 @@ module HTTMultiParty
   def self.file_present_in_params?(params)
     params.values.any? do |v|
       if v.is_a? Array
-        v.any? { |vv| TRANSFORMABLE_TYPES.include?(vv.class) }
+        v.any? { |vv| TRANSFORMABLE_TYPES.include?(vv.class) || vv.is_a?(UploadIO) }
       elsif v.is_a? Hash
-        v.values.any? { |vv| TRANSFORMABLE_TYPES.include?(vv.class) }
+        v.values.any? { |vv| TRANSFORMABLE_TYPES.include?(vv.class) || vv.is_a?(UploadIO) }
       else
-        TRANSFORMABLE_TYPES.include?(v.class)
+        TRANSFORMABLE_TYPES.include?(v.class) || v.is_a?(UploadIO)
       end
     end
   end
