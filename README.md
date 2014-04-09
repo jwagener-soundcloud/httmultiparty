@@ -1,3 +1,9 @@
+[![Build Status](https://travis-ci.org/jwagener/httmultiparty.svg?branch=v0.3.14)](https://travis-ci.org/jwagener/httmultiparty)
+
+
+[![Gem Version](https://badge.fury.io/rb/httmultiparty.svg)](http://badge.fury.io/rb/httmultiparty)
+
+
 ## Description
 
 HTTMultiParty is a thin wrapper around HTTParty to provide multipart uploads.
@@ -47,5 +53,3 @@ response = SomeClient.post('/', :query => {
   :somefile => File.new('README.md')
 }, :detect_mime_type => true)
 ```
-
-
