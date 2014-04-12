@@ -83,13 +83,17 @@ module HTTMultiParty
   def self.file_present_in_params?(params)
     params.values.any? do |v|
       if v.is_a? Array
-        v.any? { |vv| TRANSFORMABLE_TYPES.include?(vv.class) || vv.is_a?(UploadIO) }
+        v.any? { |vv| file_present?(vv) }
       elsif v.is_a? Hash
-        v.values.any? { |vv| TRANSFORMABLE_TYPES.include?(vv.class) || vv.is_a?(UploadIO) }
+        v.values.any? { |vv| file_present?(vv) }
       else
-        TRANSFORMABLE_TYPES.include?(v.class) || v.is_a?(UploadIO)
+        file_present?(v)
       end
     end
+  end
+
+  def self.file_present?(value)
+    TRANSFORMABLE_TYPES.include?(value.class) || value.is_a?(UploadIO)
   end
 
    module ClassMethods
@@ -115,8 +119,8 @@ module HTTMultiParty
 
     private
       def hash_contains_files?(hash)
-        hash.is_a?(Hash) && HTTMultiParty.flatten_params(hash).select do |(k,v)|
-          TRANSFORMABLE_TYPES.include?(v.class) || v.is_a?(UploadIO)
+        hash.is_a?(Hash) && HTTMultiParty.flatten_params(hash).select do |_,v|
+          HTTMultiParty.file_present?(v)
         end.size > 0
       end
    end
