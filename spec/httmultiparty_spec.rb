@@ -9,6 +9,7 @@ describe HTTMultiParty do
   let(:somejpegfile) { File.new(File.join(File.dirname(__FILE__), 'fixtures/somejpegfile.jpeg')) }
   let(:somepngfile) { File.new(File.join(File.dirname(__FILE__), 'fixtures/somepngfile.png')) }
   let(:sometempfile) { Tempfile.new('sometempfile') }
+  let(:customtestfile) { CustomTestFile.new(File.join(File.dirname(__FILE__), 'fixtures/somefile.txt')) }
   let(:someuploadio) { UploadIO.new(somefile, "application/octet-stream") }
   let(:klass) { Class.new.tap { |k| k.instance_eval { include HTTMultiParty} } }
 
@@ -165,6 +166,14 @@ describe HTTMultiParty do
     it "should map a Tempfile to UploadIO" do
       (first_k, first_v) = subject.call({
         :file => sometempfile
+      }).first
+
+      first_v.should be_an UploadIO
+    end
+
+    it "should map a CustomTestfile to UploadIO" do
+      (first_k, first_v) = subject.call({
+        :file => customtestfile
       }).first
 
       first_v.should be_an UploadIO

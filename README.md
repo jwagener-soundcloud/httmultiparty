@@ -53,3 +53,6 @@ response = SomeClient.post('/', :query => {
   :somefile => File.new('README.md')
 }, :detect_mime_type => true)
 ```
+## File class support
+
+You can use any class that responds to a `read` method. This method should act similar to the `IO#read` method. To set the filename your file class can optionally respond to the `original_filename` method, which should return a `String`.
