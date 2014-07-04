@@ -16,8 +16,10 @@ HTTMultiParty is a thin wrapper around HTTParty to provide multipart uploads.
 
 ## Quick Start and Example
 
-To start just "include HTTMultiParty" instead of "include HTTParty" into
-your client class. When you pass a query with an instance of a File as a value for a PUT or POST request, the wrapper will use a bit of magic and multipart-post to execute a multipart upload:
+To start just `include HTTMultiParty` instead of `include HTTParty` into
+your client class. When you pass a query with an instance of a File as
+a value for a PUT or POST request, the wrapper will use a bit of magic
+and multipart-post to execute a multipart upload:
 
 ```ruby
 require 'httmultiparty'
@@ -55,4 +57,9 @@ response = SomeClient.post('/', :query => {
 ```
 ## File class support
 
-You can use any class that responds to a `read` method. This method should act similar to the `IO#read` method. To set the filename your file class can optionally respond to the `original_filename` method, which should return a `String`.
+Instead of using `File` class, you can use any class that responds to
+a `read` method as a file object. If you are using Rails, you can use
+`ActionDispatch::Http::UploadedFile` object directly as it responds to
+`read` method. The `read` method should act similar to the `IO#read`
+method. To set the filename your file class can optionally respond to
+the `original_filename` method, which should return a `String`.
