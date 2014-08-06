@@ -163,6 +163,14 @@ describe HTTMultiParty do
       first_v.should be_an UploadIO
     end
 
+    it "should use the same UploadIO" do
+      (first_k, first_v) = subject.call({
+        :file => someuploadio
+      }).first
+
+      first_v.should eq(someuploadio)
+    end
+
     it "should map a Tempfile to UploadIO" do
       (first_k, first_v) = subject.call({
         :file => sometempfile
