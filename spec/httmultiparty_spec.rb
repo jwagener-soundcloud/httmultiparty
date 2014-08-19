@@ -185,6 +185,14 @@ describe HTTMultiParty do
       }).each { |(k,v)| v.should be_an UploadIO }
     end
 
+    it "should map files in nested hashes to UploadIOs" do
+      (first_k, first_v) = subject.call({
+        :foo => { :bar => { :baz => somefile } }
+      }).first
+
+      first_v.should be_an UploadIO
+    end
+
     it 'parses file and non-file parameters properly irrespective of their position' do
       response = subject.call(
         :name  => 'foo',
