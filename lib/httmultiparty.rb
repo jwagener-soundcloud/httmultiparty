@@ -1,5 +1,3 @@
-gem 'httparty'
-gem 'multipart-post'
 require 'tempfile'
 require 'httparty'
 require 'net/http/post/multipart'
