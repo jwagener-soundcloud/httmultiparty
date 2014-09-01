@@ -77,11 +77,24 @@ module HTTMultiParty
   private
 
   def self.file_present_in_params?(params)
-    params.values.any? do |v|
+    tmp_params = params.is_a?(Array) ? params : params.values
+    tmp_params.any? do |v|
       if v.is_a? Array
-        v.any? { |vv| file_present?(vv) }
+        v.any? do |vv| 
+          if vv.is_a? Hash
+            file_present_in_params? vv
+          else
+            file_present?(vv) 
+          end
+        end
       elsif v.is_a? Hash
-        v.values.any? { |vv| file_present?(vv) }
+        v.values.any? do |vv| 
+          if vv.is_a? Array
+            file_present_in_params? vv
+          else
+            file_present?(vv) 
+          end
+        end
       else
         file_present?(v)
       end
