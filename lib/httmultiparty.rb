@@ -23,8 +23,9 @@ module HTTMultiParty
     detect_mime_type = options.fetch(:detect_mime_type, false)
     Proc.new do |params|
       HTTMultiParty.flatten_params(params).map do |(k,v)|
-        if file_present_in_params?(params)
-          [k, v.respond_to?(:read) ? HTTMultiParty.file_to_upload_io(v, detect_mime_type) : v]
+        if file_present?(params)
+          v = prepare_value!(v,detect_mime_type)
+          [k, v]
         else
           "#{k}=#{v}"
         end
@@ -48,6 +49,11 @@ module HTTMultiParty
       end
     end
     flattened
+  end
+
+  def self.prepare_value!(value, detect_mime_type)
+    return value if does_not_need_conversion?(value)
+    HTTMultiParty.file_to_upload_io(value, detect_mime_type)
   end
 
   def self.get(*args)
@@ -76,50 +82,63 @@ module HTTMultiParty
 
   private
 
-  def self.file_present_in_params?(params)
-    params.values.any? do |v|
-      if v.is_a? Array
-        v.any? { |vv| file_present?(vv) }
-      elsif v.is_a? Hash
-        file_present_in_params?(v)
-      else
-        file_present?(v)
-      end
+  def self.file_present?(params)
+    if params.is_a? Array
+      file_present_in_array?(params)
+    elsif params.is_a? Hash
+      file_present_in_array?(params.values)
+    else
+      is_a_file?(params)
     end
   end
 
-  def self.file_present?(value)
+  def self.file_present_in_array?(ary)
+    ary.any? { |a| file_present?(a) }
+  end
+
+  def self.is_a_file?(value)
     value.respond_to?(:read)
   end
 
-   module ClassMethods
-     def post(path, options={})
-       method = Net::HTTP::Post
-       options[:body] ||= options.delete(:query)
-       if hash_contains_files?(options[:body])
-         method = MultipartPost
-         options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
-       end
-       perform_request method, path, options
-     end
+  def self.is_not_a_file?(value)
+    !is_a_file?(value)
+  end
 
-     def put(path, options={})
-       method = Net::HTTP::Put
-       options[:body] ||= options.delete(:query)
-       if hash_contains_files?(options[:body])
-         method = MultipartPut
-         options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
-       end
-       perform_request method, path, options
-     end
+  def self.is_an_upload_io?(value)
+    value.is_a?(UploadIO)
+  end
+
+  def self.does_not_need_conversion?(value)
+    is_not_a_file?(value) ||
+      is_an_upload_io?(value)
+  end
+
+  module ClassMethods
+    def post(path, options={})
+      method = Net::HTTP::Post
+      options[:body] ||= options.delete(:query)
+      if hash_contains_files?(options[:body])
+        method = MultipartPost
+        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
+      end
+      perform_request method, path, options
+    end
+
+    def put(path, options={})
+      method = Net::HTTP::Put
+      options[:body] ||= options.delete(:query)
+      if hash_contains_files?(options[:body])
+        method = MultipartPut
+        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
+      end
+      perform_request method, path, options
+    end
 
     private
-      def hash_contains_files?(hash)
-        hash.is_a?(Hash) && HTTMultiParty.flatten_params(hash).select do |_,v|
-          HTTMultiParty.file_present?(v)
-        end.size > 0
-      end
-   end
+    def hash_contains_files?(hash)
+      HTTMultiParty.file_present?(hash)
+    end
+  end
 
   class Basement
     include HTTMultiParty
