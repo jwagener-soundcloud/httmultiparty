@@ -24,7 +24,7 @@ module HTTMultiParty
     Proc.new do |params|
       HTTMultiParty.flatten_params(params).map do |(k,v)|
         if file_present_in_params?(params)
-          [k, v.respond_to?(:read) ? HTTMultiParty.file_to_upload_io(v, detect_mime_type) : v]
+          [k, v.respond_to?(:read) && !v.is_a?(UploadIO) ? HTTMultiParty.file_to_upload_io(v, detect_mime_type) : v]
         else
           "#{k}=#{v}"
         end
