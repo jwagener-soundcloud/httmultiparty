@@ -81,7 +81,7 @@ module HTTMultiParty
       if v.is_a? Array
         v.any? { |vv| file_present?(vv) }
       elsif v.is_a? Hash
-        v.values.any? { |vv| file_present?(vv) }
+        file_present_in_params?(v)
       else
         file_present?(v)
       end
