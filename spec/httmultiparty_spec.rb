@@ -42,6 +42,10 @@ describe HTTMultiParty do
     it "should return true if passed hash includes an a array of files" do
       klass.send(:hash_contains_files?, {:somefiles => [somefile, somefile]}).should be_true
     end
+
+    it "should return true if passed hash includes a hash with an array of files" do
+      klass.send(:hash_contains_files?, {:somefiles => {:in_here => [somefile, somefile]}}).should be_true
+    end
   end
 
   describe '#post' do
@@ -161,6 +165,14 @@ describe HTTMultiParty do
       }).first
 
       first_v.should be_an UploadIO
+    end
+
+    it "should use the same UploadIO" do
+      (first_k, first_v) = subject.call({
+        :file => someuploadio
+      }).first
+
+      first_v.should eq(someuploadio)
     end
 
     it "should map a Tempfile to UploadIO" do
