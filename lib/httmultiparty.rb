@@ -10,19 +10,15 @@ module HTTMultiParty
   end
 
   def self.file_to_upload_io(file, detect_mime_type = false)
-    if file.respond_to? :original_filename
-      filename = file.original_filename
-    else
-      filename =  File.split(file.path).last
-    end
-    content_type = detect_mime_type ? MimeMagic.by_path(filename) : 'application/octet-stream'
+    filename = get_filename(file)
+    content_type = get_content_type(detect_mime_type)
     UploadIO.new(file, content_type, filename)
   end
 
   def self.query_string_normalizer(options = {})
     detect_mime_type = options.fetch(:detect_mime_type, false)
     Proc.new do |params|
-      HTTMultiParty.flatten_params(params).map do |(k,v)|
+      flatten_params(params).map do |(k,v)|
         if file_present?(params)
           v = prepare_value!(v,detect_mime_type)
           [k, v]
@@ -53,7 +49,7 @@ module HTTMultiParty
 
   def self.prepare_value!(value, detect_mime_type)
     return value if does_not_need_conversion?(value)
-    HTTMultiParty.file_to_upload_io(value, detect_mime_type)
+    file_to_upload_io(value, detect_mime_type)
   end
 
   def self.get(*args)
@@ -113,28 +109,44 @@ module HTTMultiParty
       upload_io?(value)
   end
 
+  def get_filename(file)
+    if file.respond_to? :original_filename
+      file.original_filename
+    else
+      File.split(file.path).last
+    end
+  end
+
+  def get_content_type(detect_mime_type)
+    #make explicit boolean conversion
+    if !!detect_mime_type
+      MimeMagic.by_path(filename)
+    else
+      'application/octet-stream'
+    end
+  end
+
   module ClassMethods
     def post(path, options={})
-      method = Net::HTTP::Post
-      options[:body] ||= options.delete(:query)
-      if hash_contains_files?(options[:body])
-        method = MultipartPost
-        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
-      end
-      perform_request method, path, options
+      multipartable_method(Net::HTTP::Post, MultipartPost, path, options)
     end
 
     def put(path, options={})
-      method = Net::HTTP::Put
-      options[:body] ||= options.delete(:query)
-      if hash_contains_files?(options[:body])
-        method = MultipartPut
-        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
-      end
-      perform_request method, path, options
+      multipartable_method(Net::HTTP::Put, MultipartPut, path, options)
     end
 
     private
+
+    def multipartable_method(default_method, multipart_method, path, options={})
+      options[:body] ||= options.delete(:query)
+      method = if hash_contains_files?(options[:body])
+        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
+        multipart_method
+      else
+        default_method
+      end
+      perform_request method, path, options
+    end
 
     def hash_contains_files?(hash)
       HTTMultiParty.file_present?(hash)
