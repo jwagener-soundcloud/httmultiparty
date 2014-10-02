@@ -10,12 +10,8 @@ module HTTMultiParty
   end
 
   def self.file_to_upload_io(file, detect_mime_type = false)
-    if file.respond_to? :original_filename
-      filename = file.original_filename
-    else
-      filename =  File.split(file.path).last
-    end
-    content_type = detect_mime_type ? MimeMagic.by_path(filename) : 'application/octet-stream'
+    filename = get_filename(file)
+    content_type = get_content_type(detect_mime_type)
     UploadIO.new(file, content_type, filename)
   end
 
@@ -111,6 +107,23 @@ module HTTMultiParty
   def self.does_not_need_conversion?(value)
     not_a_file?(value) ||
       upload_io?(value)
+  end
+
+  def get_filename(file)
+    if file.respond_to? :original_filename
+      file.original_filename
+    else
+      File.split(file.path).last
+    end
+  end
+
+  def get_content_type(detect_mime_type)
+    #make explicit boolean conversion
+    if !!detect_mime_type
+      MimeMagic.by_path(filename)
+    else
+      'application/octet-stream'
+    end
   end
 
   module ClassMethods
