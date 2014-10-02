@@ -22,7 +22,7 @@ module HTTMultiParty
   def self.query_string_normalizer(options = {})
     detect_mime_type = options.fetch(:detect_mime_type, false)
     Proc.new do |params|
-      HTTMultiParty.flatten_params(params).map do |(k,v)|
+      flatten_params(params).map do |(k,v)|
         if file_present?(params)
           v = prepare_value!(v,detect_mime_type)
           [k, v]
@@ -53,7 +53,7 @@ module HTTMultiParty
 
   def self.prepare_value!(value, detect_mime_type)
     return value if does_not_need_conversion?(value)
-    HTTMultiParty.file_to_upload_io(value, detect_mime_type)
+    file_to_upload_io(value, detect_mime_type)
   end
 
   def self.get(*args)
