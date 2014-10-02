@@ -115,26 +115,25 @@ module HTTMultiParty
 
   module ClassMethods
     def post(path, options={})
-      method = Net::HTTP::Post
-      options[:body] ||= options.delete(:query)
-      if hash_contains_files?(options[:body])
-        method = MultipartPost
-        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
-      end
-      perform_request method, path, options
+      multipartable_method(Net::HTTP::Post, MultipartPost, path, options)
     end
 
     def put(path, options={})
-      method = Net::HTTP::Put
-      options[:body] ||= options.delete(:query)
-      if hash_contains_files?(options[:body])
-        method = MultipartPut
-        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
-      end
-      perform_request method, path, options
+      multipartable_method(Net::HTTP::Put, MultipartPut, path, options)
     end
 
     private
+
+    def multipartable_method(default_method, multipart_method, path, options={})
+      options[:body] ||= options.delete(:query)
+      method = if hash_contains_files?(options[:body])
+        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
+        multipart_method
+      else
+        default_method
+      end
+      perform_request method, path, options
+    end
 
     def hash_contains_files?(hash)
       HTTMultiParty.file_present?(hash)
