@@ -88,7 +88,7 @@ module HTTMultiParty
     elsif params.is_a? Hash
       file_present_in_array?(params.values)
     else
-      is_a_file?(params)
+      file?(params)
     end
   end
 
@@ -96,21 +96,21 @@ module HTTMultiParty
     ary.any? { |a| file_present?(a) }
   end
 
-  def self.is_a_file?(value)
+  def self.file?(value)
     value.respond_to?(:read)
   end
 
-  def self.is_not_a_file?(value)
-    !is_a_file?(value)
+  def self.not_a_file?(value)
+    !file?(value)
   end
 
-  def self.is_an_upload_io?(value)
+  def self.upload_io?(value)
     value.is_a?(UploadIO)
   end
 
   def self.does_not_need_conversion?(value)
-    is_not_a_file?(value) ||
-      is_an_upload_io?(value)
+    not_a_file?(value) ||
+      upload_io?(value)
   end
 
   module ClassMethods
@@ -135,6 +135,7 @@ module HTTMultiParty
     end
 
     private
+
     def hash_contains_files?(hash)
       HTTMultiParty.file_present?(hash)
     end
