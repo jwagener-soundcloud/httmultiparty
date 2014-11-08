@@ -4,6 +4,8 @@
 [![Gem Version](https://badge.fury.io/rb/httmultiparty.svg)](http://badge.fury.io/rb/httmultiparty)
 
 
+[![Code Climate](https://codeclimate.com/github/jwagener/httmultiparty/badges/gpa.svg)](https://codeclimate.com/github/jwagener/httmultiparty)
+
 ## Description
 
 HTTMultiParty is a thin wrapper around HTTParty to provide multipart uploads.
