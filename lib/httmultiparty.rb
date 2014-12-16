@@ -25,6 +25,7 @@ module HTTMultiParty
       HTTMultiParty.flatten_params(params).map do |(k,v)|
         if file_present?(params)
           v = prepare_value!(v,detect_mime_type)
+          p "Value size #{v.size} read #{v.read}"
           [k, v]
         else
           "#{k}=#{v}"
