@@ -139,6 +139,7 @@ module HTTMultiParty
     end
 
     def patch(path, options={})
+      p "PATCH #{path} \n#{options}"
       method = Net::HTTP::Patch
       options[:body] ||= options.delete(:query)
       if hash_contains_files?(options[:body])
