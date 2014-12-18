@@ -98,6 +98,55 @@ describe HTTMultiParty do
     end
   end
 
+  describe '#patch' do
+    it "should respond to patch" do
+      klass.should respond_to :post
+    end
+
+    it "should setup new request with Net::HTTP::Patch" do
+      HTTParty::Request.should_receive(:new) \
+        .with(Net::HTTP::Patch, anything, anything) \
+        .and_return(mock("mock response", :perform => nil))
+      klass.patch('http://example.com/', {})
+    end
+
+    describe 'when :query contains a file' do
+      let(:query) { {:somefile => somefile } }
+
+      it "should setup new request with Net::HTTP::Patch::Multipart" do
+        HTTParty::Request.should_receive(:new) \
+          .with(HTTMultiParty::MultipartPatch, anything, anything) \
+          .and_return(mock("mock response", :perform => nil))
+        klass.patch('http://example.com/', :query => query)
+      end
+    end
+
+    describe 'when :body contains a file' do
+      let(:body) { {:somefile => somefile } }
+
+      it "should setup new request with Net::HTTP::Patch::Multipart" do
+        HTTParty::Request.should_receive(:new) \
+          .with(HTTMultiParty::MultipartPatch, anything, anything) \
+          .and_return(mock("mock response", :perform => nil))
+        klass.patch('http://example.com/', :body => body)
+      end
+    end
+
+    describe 'with default_params' do
+      let(:body) { { somefile: somefile } }
+
+      it 'should include default_params also' do
+        klass.tap do |c|
+          c.instance_eval { default_params(token: 'fake') }
+        end
+
+        FakeWeb.register_uri(:patch, 'http://example.com?token=fake', body: 'hello world')
+
+        klass.patch('http://example.com', body: body)
+      end
+    end
+  end
+
   describe "#file_to_upload_io" do
     it "should get the physical name of a file" do
       HTTMultiParty.file_to_upload_io(somefile)\
