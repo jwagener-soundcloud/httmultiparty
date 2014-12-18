@@ -142,7 +142,7 @@ module HTTMultiParty
       p "PATCH #{path} #{options}"
       method = Net::HTTP::Patch
       options[:body] ||= options.delete(:query)
-      if hash_contains_files?(options[:body])
+      if hash_contains_files?(options[:body]) || options[:multipart]
         method = MultipartPatch
         options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
         p "Options #{options}"
