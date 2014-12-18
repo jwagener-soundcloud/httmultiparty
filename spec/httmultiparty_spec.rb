@@ -20,6 +20,7 @@ describe HTTMultiParty do
   it "should extend HTTParty::Request::SupportedHTTPMethods with Multipart methods" do
     HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPost
     HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPut
+    HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPatch
   end
 
   describe '#hash_contains_files?' do
@@ -93,6 +94,55 @@ describe HTTMultiParty do
         FakeWeb.register_uri(:post, 'http://example.com?token=fake', body: 'hello world')
 
         klass.post('http://example.com', body: body)
+      end
+    end
+  end
+
+  describe '#patch' do
+    it "should respond to patch" do
+      klass.should respond_to :post
+    end
+
+    it "should setup new request with Net::HTTP::Patch" do
+      HTTParty::Request.should_receive(:new) \
+        .with(Net::HTTP::Patch, anything, anything) \
+        .and_return(mock("mock response", :perform => nil))
+      klass.patch('http://example.com/', {})
+    end
+
+    describe 'when :query contains a file' do
+      let(:query) { {:somefile => somefile } }
+
+      it "should setup new request with Net::HTTP::Patch::Multipart" do
+        HTTParty::Request.should_receive(:new) \
+          .with(HTTMultiParty::MultipartPatch, anything, anything) \
+          .and_return(mock("mock response", :perform => nil))
+        klass.patch('http://example.com/', :query => query)
+      end
+    end
+
+    describe 'when :body contains a file' do
+      let(:body) { {:somefile => somefile } }
+
+      it "should setup new request with Net::HTTP::Patch::Multipart" do
+        HTTParty::Request.should_receive(:new) \
+          .with(HTTMultiParty::MultipartPatch, anything, anything) \
+          .and_return(mock("mock response", :perform => nil))
+        klass.patch('http://example.com/', :body => body)
+      end
+    end
+
+    describe 'with default_params' do
+      let(:body) { { somefile: somefile } }
+
+      it 'should include default_params also' do
+        klass.tap do |c|
+          c.instance_eval { default_params(token: 'fake') }
+        end
+
+        FakeWeb.register_uri(:patch, 'http://example.com?token=fake', body: 'hello world')
+
+        klass.patch('http://example.com', body: body)
       end
     end
   end
@@ -226,6 +276,34 @@ describe HTTMultiParty do
         content_types = result.map { |(k,v)| v.content_type  }
 
         content_types.should == ['image/jpeg', 'image/png']
+      end
+    end
+
+    describe "when :multipart is true" do
+      subject  { HTTMultiParty.query_string_normalizer(multipart: true) }
+
+      it "should map non-file parameters into key-value array pairs" do
+        result = subject.call({
+          :foo => 'foo value',
+          :bar => 'bar value'
+        })
+
+        result.should == [['foo', 'foo value'], ['bar', 'bar value']]
+        
+      end
+    end
+
+    describe "when :multipart is false" do
+      subject  { HTTMultiParty.query_string_normalizer(multipart: false) }
+
+      it "should map non-file parameters into key-value string pairs" do
+        result = subject.call({
+          :foo => 'foo value',
+          :bar => 'bar value'
+        })
+
+        result.should == ['foo=foo value', 'bar=bar value']
+        
       end
     end
   end

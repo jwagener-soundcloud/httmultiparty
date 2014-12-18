@@ -23,8 +23,8 @@ module HTTMultiParty
     detect_mime_type = options.fetch(:detect_mime_type, false)
     Proc.new do |params|
       HTTMultiParty.flatten_params(params).map do |(k,v)|
-        if file_present?(params)
-          v = prepare_value!(v,detect_mime_type)
+        if file_present?(params) || options[:multipart]
+          v = prepare_value!(v,detect_mime_type)          
           [k, v]
         else
           "#{k}=#{v}"
@@ -66,6 +66,10 @@ module HTTMultiParty
 
   def self.put(*args)
     Basement.put(*args)
+  end
+
+  def self.patch(*args)
+    Basement.patch(*args)
   end
 
   def self.delete(*args)
@@ -134,6 +138,16 @@ module HTTMultiParty
       perform_request method, path, options
     end
 
+    def patch(path, options={})
+      method = Net::HTTP::Patch
+      options[:body] ||= options.delete(:query)
+      if hash_contains_files?(options[:body]) || options[:multipart]
+        method = MultipartPatch
+        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
+      end
+      perform_request method, path, options
+    end
+
     private
 
     def hash_contains_files?(hash)
@@ -150,3 +164,4 @@ require 'httmultiparty/version'
 require 'httmultiparty/multipartable'
 require 'httmultiparty/multipart_post'
 require 'httmultiparty/multipart_put'
+require 'httmultiparty/multipart_patch'
