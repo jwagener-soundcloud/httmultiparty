@@ -20,6 +20,7 @@ describe HTTMultiParty do
   it "should extend HTTParty::Request::SupportedHTTPMethods with Multipart methods" do
     HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPost
     HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPut
+    HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPatch
   end
 
   describe '#hash_contains_files?' do
@@ -226,6 +227,34 @@ describe HTTMultiParty do
         content_types = result.map { |(k,v)| v.content_type  }
 
         content_types.should == ['image/jpeg', 'image/png']
+      end
+    end
+
+    describe "when :multipart is true" do
+      subject  { HTTMultiParty.query_string_normalizer(multipart: true) }
+
+      it "should map non-file parameters into key-value array pairs" do
+        result = subject.call({
+          :foo => 'foo value',
+          :bar => 'bar value'
+        })
+
+        result.should == [['foo', 'foo value'], ['bar', 'bar value']]
+        
+      end
+    end
+
+    describe "when :multipart is false" do
+      subject  { HTTMultiParty.query_string_normalizer(multipart: false) }
+
+      it "should map non-file parameters into key-value string pairs" do
+        result = subject.call({
+          :foo => 'foo value',
+          :bar => 'bar value'
+        })
+
+        result.should == ['foo=foo value', 'bar=bar value']
+        
       end
     end
   end
