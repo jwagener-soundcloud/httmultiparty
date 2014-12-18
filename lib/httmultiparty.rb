@@ -23,7 +23,7 @@ module HTTMultiParty
     detect_mime_type = options.fetch(:detect_mime_type, false)
     Proc.new do |params|
       HTTMultiParty.flatten_params(params).map do |(k,v)|
-        if file_present?(params)
+        if file_present?(params) || options[:multipart]
           v = prepare_value!(v,detect_mime_type)          
           [k, v]
         else
