@@ -21,10 +21,10 @@ module HTTMultiParty
 
   def self.query_string_normalizer(options = {})
     detect_mime_type = options.fetch(:detect_mime_type, false)
-    Proc.new do |params|
-      HTTMultiParty.flatten_params(params).map do |(k,v)|
+    proc do |params|
+      HTTMultiParty.flatten_params(params).map do |(k, v)|
         if file_present?(params)
-          v = prepare_value!(v,detect_mime_type)
+          v = prepare_value!(v, detect_mime_type)
           [k, v]
         else
           "#{k}=#{v}"
@@ -33,15 +33,15 @@ module HTTMultiParty
     end
   end
 
-  def self.flatten_params(params={}, prefix='')
+  def self.flatten_params(params = {}, prefix = '')
     flattened = []
-    params.each do |(k,v)|
+    params.each do |(k, v)|
       if params.is_a?(Array)
         v = k
-        k = ""
+        k = ''
       end
 
-      flattened_key = prefix == "" ? "#{k}" : "#{prefix}[#{k}]"
+      flattened_key = prefix == '' ? "#{k}" : "#{prefix}[#{k}]"
       if v.is_a?(Hash) || v.is_a?(Array)
         flattened += flatten_params(v, flattened_key)
       else
@@ -114,7 +114,7 @@ module HTTMultiParty
   end
 
   module ClassMethods
-    def post(path, options={})
+    def post(path, options = {})
       method = Net::HTTP::Post
       options[:body] ||= options.delete(:query)
       if hash_contains_files?(options[:body])
@@ -124,7 +124,7 @@ module HTTMultiParty
       perform_request method, path, options
     end
 
-    def put(path, options={})
+    def put(path, options = {})
       method = Net::HTTP::Put
       options[:body] ||= options.delete(:query)
       if hash_contains_files?(options[:body])
