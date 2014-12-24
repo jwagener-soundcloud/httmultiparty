@@ -19,7 +19,7 @@ module HTTMultiParty::Multipartable
 private
 
   def set_headers_for_body
-    if @body_parts
+    if defined?(@body_parts) && @body_parts
       self.set_content_type("multipart/form-data", { "boundary" => boundary })
       self.content_length = @body_parts.inject(0) {|sum,i| sum + i.length }
       self.body_stream = CompositeReadIO.new(*@body_parts.map { |part| part.to_io })

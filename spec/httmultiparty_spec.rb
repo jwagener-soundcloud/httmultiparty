@@ -160,7 +160,7 @@ describe HTTMultiParty do
   describe "#query_string_normalizer" do
     subject { HTTMultiParty.query_string_normalizer }
     it "should map a file to UploadIO" do
-      (first_k, first_v) = subject.call({
+      (_, first_v) = subject.call({
         :file => somefile
       }).first
 
@@ -168,7 +168,7 @@ describe HTTMultiParty do
     end
 
     it "should use the same UploadIO" do
-      (first_k, first_v) = subject.call({
+      (_, first_v) = subject.call({
         :file => someuploadio
       }).first
 
@@ -176,7 +176,7 @@ describe HTTMultiParty do
     end
 
     it "should map a Tempfile to UploadIO" do
-      (first_k, first_v) = subject.call({
+      (_, first_v) = subject.call({
         :file => sometempfile
       }).first
 
@@ -184,7 +184,7 @@ describe HTTMultiParty do
     end
 
     it "should map a CustomTestfile to UploadIO" do
-      (first_k, first_v) = subject.call({
+      (_, first_v) = subject.call({
         :file => customtestfile
       }).first
 
@@ -194,11 +194,11 @@ describe HTTMultiParty do
     it "should map an array of files to UploadIOs" do
       subject.call({
         :file => [somefile, sometempfile]
-      }).each { |(k,v)| expect(v).to be_an UploadIO }
+      }).each { |(_,v)| expect(v).to be_an UploadIO }
     end
 
     it "should map files in nested hashes to UploadIOs" do
-      (first_k, first_v) = subject.call({
+      (_, first_v) = subject.call({
         :foo => { :bar => { :baz => somefile } }
       }).first
 
@@ -223,7 +223,7 @@ describe HTTMultiParty do
           :file => [somejpegfile, somepngfile]
         })
 
-        content_types = result.map { |(k,v)| v.content_type  }
+        content_types = result.map { |(_,v)| v.content_type  }
 
         expect(content_types).to eq(['image/jpeg', 'image/png'])
       end
