@@ -10,75 +10,75 @@ describe HTTMultiParty do
   let(:somepngfile) { File.new(File.join(File.dirname(__FILE__), 'fixtures/somepngfile.png')) }
   let(:sometempfile) { Tempfile.new('sometempfile') }
   let(:customtestfile) { CustomTestFile.new(File.join(File.dirname(__FILE__), 'fixtures/somefile.txt')) }
-  let(:someuploadio) { UploadIO.new(somefile, "application/octet-stream") }
-  let(:klass) { Class.new.tap { |k| k.instance_eval { include HTTMultiParty} } }
+  let(:someuploadio) { UploadIO.new(somefile, 'application/octet-stream') }
+  let(:klass) { Class.new.tap { |k| k.instance_eval { include HTTMultiParty } } }
 
-  it "should include HTTParty module" do
-    klass.included_modules.should include HTTParty
+  it 'should include HTTParty module' do
+    expect(klass.included_modules).to include HTTParty
   end
 
-  it "should extend HTTParty::Request::SupportedHTTPMethods with Multipart methods" do
-    HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPost
-    HTTParty::Request::SupportedHTTPMethods.should include HTTMultiParty::MultipartPut
+  it 'should extend HTTParty::Request::SupportedHTTPMethods with Multipart methods' do
+    expect(HTTParty::Request::SupportedHTTPMethods).to include HTTMultiParty::MultipartPost
+    expect(HTTParty::Request::SupportedHTTPMethods).to include HTTMultiParty::MultipartPut
   end
 
   describe '#hash_contains_files?' do
-    it "should return true if one of the values in the passed hash is a file" do
-      klass.send(:hash_contains_files?, {:a => 1, :somefile => somefile}).should be_true
+    it 'should return true if one of the values in the passed hash is a file' do
+      expect(klass.send(:hash_contains_files?, a: 1, somefile: somefile)).to be_truthy
     end
 
-    it "should return true if one of the values in the passed hash is an upload io " do
-      klass.send(:hash_contains_files?, {:a => 1, :somefile => someuploadio}).should be_true
+    it 'should return true if one of the values in the passed hash is an upload io ' do
+      expect(klass.send(:hash_contains_files?, a: 1, somefile: someuploadio)).to be_truthy
     end
 
-    it "should return true if one of the values in the passed hash is a tempfile" do
-      klass.send(:hash_contains_files?, {:a => 1, :somefile => sometempfile}).should be_true
+    it 'should return true if one of the values in the passed hash is a tempfile' do
+      expect(klass.send(:hash_contains_files?, a: 1, somefile: sometempfile)).to be_truthy
     end
 
-    it "should return false if none of the values in the passed hash is a file" do
-      klass.send(:hash_contains_files?, {:a => 1, :b => 'nope'}).should be_false
+    it 'should return false if none of the values in the passed hash is a file' do
+      expect(klass.send(:hash_contains_files?, a: 1, b: 'nope')).to be_falsey
     end
 
-    it "should return true if passed hash includes an a array of files" do
-      klass.send(:hash_contains_files?, {:somefiles => [somefile, somefile]}).should be_true
+    it 'should return true if passed hash includes an a array of files' do
+      expect(klass.send(:hash_contains_files?, somefiles: [somefile, somefile])).to be_truthy
     end
 
-    it "should return true if passed hash includes a hash with an array of files" do
-      klass.send(:hash_contains_files?, {:somefiles => {:in_here => [somefile, somefile]}}).should be_true
+    it 'should return true if passed hash includes a hash with an array of files' do
+      expect(klass.send(:hash_contains_files?, somefiles: { in_here: [somefile, somefile] })).to be_truthy
     end
   end
 
   describe '#post' do
-    it "should respond to post" do
-      klass.should respond_to :post
+    it 'should respond to post' do
+      expect(klass).to respond_to :post
     end
 
-    it "should setup new request with Net::HTTP::Post" do
-      HTTParty::Request.should_receive(:new) \
+    it 'should setup new request with Net::HTTP::Post' do
+      expect(HTTParty::Request).to receive(:new) \
         .with(Net::HTTP::Post, anything, anything) \
-        .and_return(mock("mock response", :perform => nil))
+        .and_return(double('mock response', perform: nil))
       klass.post('http://example.com/', {})
     end
 
     describe 'when :query contains a file' do
-      let(:query) { {:somefile => somefile } }
+      let(:query) { { somefile: somefile } }
 
-      it "should setup new request with Net::HTTP::Post::Multipart" do
-        HTTParty::Request.should_receive(:new) \
+      it 'should setup new request with Net::HTTP::Post::Multipart' do
+        expect(HTTParty::Request).to receive(:new) \
           .with(HTTMultiParty::MultipartPost, anything, anything) \
-          .and_return(mock("mock response", :perform => nil))
-        klass.post('http://example.com/', :query => query)
+          .and_return(double('mock response', perform: nil))
+        klass.post('http://example.com/', query: query)
       end
     end
 
     describe 'when :body contains a file' do
-      let(:body) { {:somefile => somefile } }
+      let(:body) { { somefile: somefile } }
 
-      it "should setup new request with Net::HTTP::Post::Multipart" do
-        HTTParty::Request.should_receive(:new) \
+      it 'should setup new request with Net::HTTP::Post::Multipart' do
+        expect(HTTParty::Request).to receive(:new) \
           .with(HTTMultiParty::MultipartPost, anything, anything) \
-          .and_return(mock("mock response", :perform => nil))
-        klass.post('http://example.com/', :body => body)
+          .and_return(double('mock response', perform: nil))
+        klass.post('http://example.com/', body: body)
       end
     end
 
@@ -97,135 +97,135 @@ describe HTTMultiParty do
     end
   end
 
-  describe "#file_to_upload_io" do
-    it "should get the physical name of a file" do
-      HTTMultiParty.file_to_upload_io(somefile)\
-        .original_filename.should == 'somefile.txt'
+  describe '#file_to_upload_io' do
+    it 'should get the physical name of a file' do
+      expect(HTTMultiParty.file_to_upload_io(somefile)\
+        .original_filename).to eq('somefile.txt')
     end
 
-    it "should get the physical name of a file" do
+    it 'should get the physical name of a file' do
       # Let's pretend this is a file upload to a rack app.
-      sometempfile.stub(:original_filename => 'stuff.txt')
-      HTTMultiParty.file_to_upload_io(sometempfile)\
-        .original_filename.should == 'stuff.txt'
+      allow(sometempfile).to receive_messages(original_filename: 'stuff.txt')
+      expect(HTTMultiParty.file_to_upload_io(sometempfile)\
+        .original_filename).to eq('stuff.txt')
     end
 
-    it "should get the content-type of a JPEG file" do
-      HTTMultiParty.file_to_upload_io(somejpegfile, true)\
-        .content_type.should == 'image/jpeg'
+    it 'should get the content-type of a JPEG file' do
+      expect(HTTMultiParty.file_to_upload_io(somejpegfile, true)\
+        .content_type).to eq('image/jpeg')
     end
 
-    it "should get the content-type of a PNG file" do
-      HTTMultiParty.file_to_upload_io(somepngfile, true)\
-        .content_type.should == 'image/png'
+    it 'should get the content-type of a PNG file' do
+      expect(HTTMultiParty.file_to_upload_io(somepngfile, true)\
+        .content_type).to eq('image/png')
     end
 
     it "should get the content-type of a JPEG file as 'application/octet-stream' by default" do
-      HTTMultiParty.file_to_upload_io(somejpegfile)\
-        .content_type.should == 'application/octet-stream'
+      expect(HTTMultiParty.file_to_upload_io(somejpegfile)\
+        .content_type).to eq('application/octet-stream')
     end
 
     it "should get the content-type of a PNG file as 'application/octet-stream' by default" do
-      HTTMultiParty.file_to_upload_io(somepngfile)\
-        .content_type.should == 'application/octet-stream'
+      expect(HTTMultiParty.file_to_upload_io(somepngfile)\
+        .content_type).to eq('application/octet-stream')
     end
   end
 
-  describe "#flatten_params" do
-    it "should handle complex hashs" do
-      HTTMultiParty.flatten_params({
-        :foo => 'bar',
-        :deep => {
-          :deeper  => 1,
-          :deeper2 => 2,
-          :deeparray => [1,2,3],
-          :deephasharray => [
-            {:id => 1},
-            {:id => 2}
+  describe '#flatten_params' do
+    it 'should handle complex hashs' do
+      expect(HTTMultiParty.flatten_params(
+        foo: 'bar',
+        deep: {
+          deeper: 1,
+          deeper2: 2,
+          deeparray: [1, 2, 3],
+          deephasharray: [
+            { id: 1 },
+            { id: 2 }
           ]
         }
-      }).sort_by(&:join).should == [
-        ['foo',                         'bar'],
+      ).sort_by(&:join)).to eq([
+        %w(foo bar),
         ['deep[deeper]',                1],
         ['deep[deeper2]',               2],
         ['deep[deeparray][]',           1],
         ['deep[deeparray][]',           2],
         ['deep[deeparray][]',           3],
         ['deep[deephasharray][][id]',   1],
-        ['deep[deephasharray][][id]',   2],
-      ].sort_by(&:join)
+        ['deep[deephasharray][][id]',   2]
+      ].sort_by(&:join))
     end
   end
 
-  describe "#query_string_normalizer" do
+  describe '#query_string_normalizer' do
     subject { HTTMultiParty.query_string_normalizer }
-    it "should map a file to UploadIO" do
-      (first_k, first_v) = subject.call({
-        :file => somefile
-      }).first
+    it 'should map a file to UploadIO' do
+      (_, first_v) = subject.call(
+        file: somefile
+      ).first
 
-      first_v.should be_an UploadIO
+      expect(first_v).to be_an UploadIO
     end
 
-    it "should use the same UploadIO" do
-      (first_k, first_v) = subject.call({
-        :file => someuploadio
-      }).first
+    it 'should use the same UploadIO' do
+      (_, first_v) = subject.call(
+        file: someuploadio
+      ).first
 
-      first_v.should eq(someuploadio)
+      expect(first_v).to eq(someuploadio)
     end
 
-    it "should map a Tempfile to UploadIO" do
-      (first_k, first_v) = subject.call({
-        :file => sometempfile
-      }).first
+    it 'should map a Tempfile to UploadIO' do
+      (_, first_v) = subject.call(
+        file: sometempfile
+      ).first
 
-      first_v.should be_an UploadIO
+      expect(first_v).to be_an UploadIO
     end
 
-    it "should map a CustomTestfile to UploadIO" do
-      (first_k, first_v) = subject.call({
-        :file => customtestfile
-      }).first
+    it 'should map a CustomTestfile to UploadIO' do
+      (_, first_v) = subject.call(
+        file: customtestfile
+      ).first
 
-      first_v.should be_an UploadIO
+      expect(first_v).to be_an UploadIO
     end
 
-    it "should map an array of files to UploadIOs" do
-      subject.call({
-        :file => [somefile, sometempfile]
-      }).each { |(k,v)| v.should be_an UploadIO }
+    it 'should map an array of files to UploadIOs' do
+      subject.call(
+        file: [somefile, sometempfile]
+      ).each { |(_, v)| expect(v).to be_an UploadIO }
     end
 
-    it "should map files in nested hashes to UploadIOs" do
-      (first_k, first_v) = subject.call({
-        :foo => { :bar => { :baz => somefile } }
-      }).first
+    it 'should map files in nested hashes to UploadIOs' do
+      (_, first_v) = subject.call(
+        foo: { bar: { baz: somefile } }
+      ).first
 
-      first_v.should be_an UploadIO
+      expect(first_v).to be_an UploadIO
     end
 
     it 'parses file and non-file parameters properly irrespective of their position' do
       response = subject.call(
-        :name  => 'foo',
-        :file  => somefile,
-        :title => 'bar'
+        name: 'foo',
+        file: somefile,
+        title: 'bar'
       )
-      response.first.should == ['name', 'foo']
-      response.last.should  == ['title', 'bar']
+      expect(response.first).to eq(%w(name foo))
+      expect(response.last).to eq(%w(title bar))
     end
 
-    describe "when :detect_mime_type is true" do
+    describe 'when :detect_mime_type is true' do
       subject  { HTTMultiParty.query_string_normalizer(detect_mime_type: true) }
 
-      it "should map an array of files to UploadIOs with the correct mimetypes" do
-        result = subject.call({
-          :file => [somejpegfile, somepngfile]
-        })
+      it 'should map an array of files to UploadIOs with the correct mimetypes' do
+        result = subject.call(
+          file: [somejpegfile, somepngfile]
+        )
 
-        content_types = result.map { |(k,v)| v.content_type  }
+        content_types = result.map { |(_, v)| v.content_type  }
 
-        content_types.should == ['image/jpeg', 'image/png']
+        expect(content_types).to eq(['image/jpeg', 'image/png'])
       end
     end
   end
