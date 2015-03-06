@@ -13,6 +13,7 @@ rvm:
  - 2.1.2
  - 2.1.5
  - 2.2.0
+ - 2.2.1
  - ruby-head
  - jruby-head
 script: "bundle exec rake"
