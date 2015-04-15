@@ -68,6 +68,10 @@ module HTTMultiParty
     Basement.put(*args)
   end
 
+  def self.patch(*args)
+    Basement.patch(*args)
+  end
+
   def self.delete(*args)
     Basement.delete(*args)
   end
@@ -134,6 +138,16 @@ module HTTMultiParty
       perform_request method, path, options
     end
 
+    def patch(path, options={})
+      method = Net::HTTP::Patch
+      options[:body] ||= options.delete(:query)
+      if hash_contains_files?(options[:body])
+        method = MultipartPatch
+        options[:query_string_normalizer] = HTTMultiParty.query_string_normalizer(options)
+      end
+      perform_request method, path, options
+    end
+
     private
 
     def hash_contains_files?(hash)
@@ -150,3 +164,4 @@ require 'httmultiparty/version'
 require 'httmultiparty/multipartable'
 require 'httmultiparty/multipart_post'
 require 'httmultiparty/multipart_put'
+require 'httmultiparty/multipart_patch'

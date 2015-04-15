@@ -20,6 +20,7 @@ describe HTTMultiParty do
   it 'should extend HTTParty::Request::SupportedHTTPMethods with Multipart methods' do
     expect(HTTParty::Request::SupportedHTTPMethods).to include HTTMultiParty::MultipartPost
     expect(HTTParty::Request::SupportedHTTPMethods).to include HTTMultiParty::MultipartPut
+    expect(HTTParty::Request::SupportedHTTPMethods).to include HTTMultiParty::MultipartPatch
   end
 
   describe '#hash_contains_files?' do
@@ -93,6 +94,55 @@ describe HTTMultiParty do
         FakeWeb.register_uri(:post, 'http://example.com?token=fake', body: 'hello world')
 
         klass.post('http://example.com', body: body)
+      end
+    end
+  end
+
+  describe '#patch' do
+    it 'should respond to patch' do
+      expect(klass).to respond_to :patch
+    end
+
+    it 'should setup new request with Net::HTTP::Patch' do
+      expect(HTTParty::Request).to receive(:new) \
+        .with(Net::HTTP::Patch, anything, anything) \
+        .and_return(double('mock response', perform: nil))
+      klass.patch('http://example.com/', {})
+    end
+
+    describe 'when :query contains a file' do
+      let(:query) { { somefile: somefile } }
+
+      it 'should setup new request with Net::HTTP::Patch::Multipart' do
+        expect(HTTParty::Request).to receive(:new) \
+          .with(HTTMultiParty::MultipartPatch, anything, anything) \
+          .and_return(double('mock response', perform: nil))
+        klass.patch('http://example.com/', query: query)
+      end
+    end
+
+    describe 'when :body contains a file' do
+      let(:body) { { somefile: somefile } }
+
+      it 'should setup new request with Net::HTTP::Patch::Multipart' do
+        expect(HTTParty::Request).to receive(:new) \
+          .with(HTTMultiParty::MultipartPatch, anything, anything) \
+          .and_return(double('mock response', perform: nil))
+        klass.patch('http://example.com/', body: body)
+      end
+    end
+
+    describe 'with default_params' do
+      let(:body) { { somefile: somefile } }
+
+      it 'should include default_params also' do
+        klass.tap do |c|
+          c.instance_eval { default_params(token: 'fake') }
+        end
+
+        FakeWeb.register_uri(:patch, 'http://example.com?token=fake', body: 'hello world')
+
+        klass.patch('http://example.com', body: body)
       end
     end
   end
